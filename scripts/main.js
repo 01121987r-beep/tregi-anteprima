@@ -142,11 +142,6 @@
       open(trigger);
       dialog.showModal();
       dialog.scrollTop = 0;
-      if (motion && !reduced.matches) {
-        motion.fromTo(dialog, { y: 10 }, {
-          y: 0, duration: .24, ease: 'power2.out', overwrite: true, clearProps: 'transform',
-        });
-      }
     };
   }
 
@@ -280,6 +275,22 @@
     let inView = false;
     let hoveringControls = false;
     let timer;
+    let preparingSlides = false;
+
+    async function prepareSlides() {
+      if (preparingSlides || !inView || document.hidden || navigator.connection?.saveData) return;
+      preparingSlides = true;
+      await images[0].decode().catch(() => {});
+      await new Promise(requestAnimationFrame);
+      for (const image of images.slice(1)) {
+        if (!inView || document.hidden) break;
+        if (image.loading === 'eager') continue;
+        image.fetchPriority = 'low';
+        image.loading = 'eager';
+        await image.decode().catch(() => {});
+      }
+      preparingSlides = false;
+    }
 
     function canRotate() {
       const focusInHero = hero.contains(document.activeElement) && document.activeElement !== introHeading;
@@ -318,16 +329,23 @@
 
     async function select(index, automatic = false) {
       const version = ++requestVersion;
+      sceneMenu.querySelector('[aria-busy=true]')?.removeAttribute('aria-busy');
       if (index === null || index === active || unavailable.has(index)) return;
 
       const incoming = slides[index];
       const image = images[index];
+      if (!automatic) {
+        selectors[index].setAttribute('aria-busy', 'true');
+        image.fetchPriority = 'high';
+      }
       image.loading = 'eager';
       try {
         await image.decode();
       } catch {
         if (image.complete && !image.naturalWidth) markUnavailable(index);
         return;
+      } finally {
+        if (version === requestVersion) selectors[index].removeAttribute('aria-busy');
       }
       if (version !== requestVersion || (automatic && !canRotate())) return;
 
@@ -380,11 +398,15 @@
     hero.addEventListener('focusin', scheduleRotation);
     hero.addEventListener('focusout', () => queueMicrotask(scheduleRotation));
     intro?.addEventListener('introend', scheduleRotation);
-    document.addEventListener('visibilitychange', scheduleRotation);
+    document.addEventListener('visibilitychange', () => {
+      scheduleRotation();
+      prepareSlides();
+    });
     document.querySelectorAll('dialog').forEach(dialog => dialog.addEventListener('close', scheduleRotation));
     const visibility = new IntersectionObserver(([entry]) => {
       inView = entry.intersectionRatio >= .45;
       scheduleRotation();
+      prepareSlides();
     }, { threshold: .45 });
     visibility.observe(hero);
     sceneMenu.hidden = false;
@@ -414,6 +436,21 @@
     });
   }
   if (document.querySelector('.hero-photos')) setupCarousel();
+
+  const showroomMap = document.querySelector('.showroom-map-frame');
+  if (showroomMap) {
+    const loadMap = () => showroomMap.replaceChildren(showroomMap.querySelector('template').content.cloneNode(true));
+    if ('IntersectionObserver' in window) {
+      const visibility = new IntersectionObserver(([entry]) => {
+        if (!entry.isIntersecting) return;
+        visibility.disconnect();
+        loadMap();
+      }, { rootMargin: '180px' });
+      visibility.observe(showroomMap);
+    } else {
+      loadMap();
+    }
+  }
 
   const brandBanner = document.querySelector('.brand-banner');
   if (brandBanner && 'IntersectionObserver' in window) {
@@ -455,7 +492,7 @@
         if (openingCard) return;
         openingCard = card;
         card.setAttribute('data-pressed', '');
-        navigationTimer = window.setTimeout(() => window.location.assign(card.href), 240);
+        navigationTimer = window.setTimeout(() => window.location.assign(card.href), 120);
       });
     });
 

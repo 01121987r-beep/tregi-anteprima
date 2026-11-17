@@ -45,6 +45,7 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 body:has(dialog[open]) { overflow: hidden; }
+body:has(dialog[open]) :is(.brand-loop, .whatsapp-bubble) { animation-play-state: paused; }
 a { color: inherit; text-decoration: none; }
 button, input, select, textarea { font: inherit; color: inherit; }
 button { cursor: pointer; }
@@ -328,6 +329,7 @@ em { font-family: var(--serif); font-weight: 400; }
 }
 .scene-select button:hover::before { background: white; }
 .scene-select button[aria-pressed=true]::before { background: white; scale: 1.35; }
+.scene-select button[aria-busy=true]::before { background: #ffdbc0; scale: 1.2; }
 .scene-select button:focus-visible::before { background: #ffdbc0; scale: 1.65; }
 
 .section-head {
@@ -621,7 +623,7 @@ em { font-family: var(--serif); font-weight: 400; }
 .contact-hours { white-space: nowrap; }
 .contact-location-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .25rem 1rem; margin-top: .8rem; }
 .contact-map { position: relative; min-height: 23rem; background: var(--cream); }
-.contact-map iframe { position: absolute; inset: 0; display: block; width: 100%; height: 100%; border: 0; }
+.contact-map .showroom-map-frame { position: absolute; inset: 0; }
 .contact-message { padding-block: clamp(2.6rem, 6vw, 5.5rem); background: var(--cream); }
 .contact-message-layout { display: grid; grid-template-columns: minmax(0, .8fr) minmax(0, 1.2fr); gap: clamp(1.8rem, 8vw, 7rem); }
 .contact-message-intro h2 { font-size: clamp(2.6rem, 5.1vw, 5rem); text-wrap: initial; }
@@ -665,7 +667,8 @@ em { font-family: var(--serif); font-weight: 400; }
 .map-address svg { color: var(--red); }
 .map-address h3 { font-size: clamp(1.5rem, 2.6vw, 2.1rem); }
 .map-address p { font-size: .86rem; }
-.showroom-map iframe { display: block; width: 100%; height: clamp(17rem, 24vw, 22rem); border: 0; }
+.showroom-map .showroom-map-frame { height: clamp(17rem, 24vw, 22rem); }
+.showroom-map-frame iframe { display: block; width: 100%; height: 100%; border: 0; }
 .showroom-teaser .map-toolbar { background: var(--red); color: white; }
 .showroom-teaser .map-address :is(svg, p) { color: inherit; }
 
@@ -724,28 +727,37 @@ em { font-family: var(--serif); font-weight: 400; }
 .footer-bottom button { min-height: 2.75rem; border: none; padding: 0; background: none; }
 .footer-bottom button:focus-visible { color: #ffddc6; font-weight: 700; }
 .whatsapp {
+  --whatsapp-size: 3.6rem;
+  --whatsapp-travel: .4rem;
   position: fixed;
   z-index: 60;
   right: clamp(.9rem, 2vw, 1.5rem);
   bottom: clamp(.9rem, 2vw, 1.5rem);
   display: grid;
-  place-items: center;
-  width: 3.6rem;
-  height: 3.6rem;
+  place-items: end center;
+  width: var(--whatsapp-size);
+  height: calc(var(--whatsapp-size) + var(--whatsapp-travel));
   padding: 0;
   border: 0;
+  background: none;
+}
+.whatsapp-bubble {
+  display: grid;
+  place-items: center;
+  width: var(--whatsapp-size);
+  height: var(--whatsapp-size);
   border-radius: 50%;
   background: #1aa452;
   color: #fff;
   box-shadow: 0 .35rem 1.15rem #2224;
   animation: whatsapp-float 3s ease-in-out infinite;
 }
-.whatsapp:is(:hover, :focus-visible) { animation-play-state: paused; }
-.whatsapp:hover { background: #168f47; }
-.whatsapp:focus-visible { background: #106d38; }
+.whatsapp:is(:hover, :focus-visible) .whatsapp-bubble { animation-play-state: paused; }
+.whatsapp:hover .whatsapp-bubble { background: #168f47; }
+.whatsapp:focus-visible .whatsapp-bubble { background: #106d38; }
 @keyframes whatsapp-float {
   0%, 100% { transform: translateY(0); }
-  50% { transform: translateY(-.4rem); }
+  50% { transform: translateY(calc(-1 * var(--whatsapp-travel))); }
 }
 
 dialog {
@@ -758,6 +770,11 @@ dialog {
   color: var(--ink);
 }
 dialog::backdrop { background: #1b1410bd; }
+dialog[open] { animation: dialog-enter .22s var(--ease); }
+@keyframes dialog-enter {
+  from { opacity: .86; transform: translateY(.4rem); }
+  to { opacity: 1; transform: translateY(0); }
+}
 dialog h2 { font-size: clamp(2rem, 4vw, 3.45rem); text-wrap: initial; }
 dialog h2[autofocus]:focus { outline: none; }
 dialog > p { margin: .95rem 0 1.35rem; }
@@ -997,7 +1014,7 @@ dialog > p { margin: .95rem 0 1.35rem; }
   .product-more { padding-block: 3.2rem; gap: 1rem; }
   .catalog-items, .catalog-item:only-child { grid-template-columns: 1fr; }
   .editorial-body h2, .closing h2 { max-width: 15ch; }
-  .whatsapp { width: 3.25rem; height: 3.25rem; }
+  .whatsapp { --whatsapp-size: 3.25rem; }
   .contact-message .form-grid { grid-template-columns: 1fr; }
 }
 
@@ -1018,6 +1035,7 @@ dialog > p { margin: .95rem 0 1.35rem; }
   }
   .quote-dialog-inner { display: block; }
   .quote-photo { display: none; }
+  .quote-dialog::backdrop { backdrop-filter: none; }
   .quote-dialog-heading { padding-block: .5rem .15rem; }
   .quote-dialog-heading h2 { font-size: clamp(1.65rem, 6.6vw, 2.35rem); }
   .quote-dialog .form-note { margin-block: .1rem .6rem; font-size: .8rem; line-height: 1.35; }
