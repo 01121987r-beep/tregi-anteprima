@@ -786,7 +786,6 @@ dialog > p { margin: .95rem 0 1.35rem; }
   scroll-padding-block-start: 7rem;
   overscroll-behavior: contain;
 }
-.quote-dialog::backdrop { backdrop-filter: blur(5px); }
 .quote-dialog-inner { display: grid; grid-template-columns: .58fr 1fr; }
 .quote-photo {
   position: relative;
@@ -1035,7 +1034,6 @@ dialog > p { margin: .95rem 0 1.35rem; }
   }
   .quote-dialog-inner { display: block; }
   .quote-photo { display: none; }
-  .quote-dialog::backdrop { backdrop-filter: none; }
   .quote-dialog-heading { padding-block: .5rem .15rem; }
   .quote-dialog-heading h2 { font-size: clamp(1.65rem, 6.6vw, 2.35rem); }
   .quote-dialog .form-note { margin-block: .1rem .6rem; font-size: .8rem; line-height: 1.35; }

@@ -169,6 +169,14 @@
   const openQuote = bindDialog(quote, trigger => {
     if (trigger.dataset.project) document.querySelector('#quote-interest').value = trigger.dataset.project;
   });
+  const quotePhoto = quote.querySelector('.quote-photo img');
+  function prepareQuotePhoto() {
+    if (quotePhoto.loading !== 'lazy' || getComputedStyle(quotePhoto.parentElement).display === 'none') return;
+    quotePhoto.fetchPriority = 'low';
+    quotePhoto.loading = 'eager';
+    quotePhoto.decode().catch(() => {});
+  }
+
   const quoteViewport = window.visualViewport;
   const quoteHeading = quote.querySelector('.quote-dialog-heading');
   function fitQuoteToViewport() {
@@ -187,6 +195,8 @@
   quoteViewport?.addEventListener('resize', fitQuoteToViewport);
   quoteViewport?.addEventListener('scroll', fitQuoteToViewport);
   document.querySelectorAll('[data-open-quote]').forEach(button => {
+    button.addEventListener('pointerenter', prepareQuotePhoto);
+    button.addEventListener('focus', prepareQuotePhoto);
     button.addEventListener('click', () => {
       openQuote(button);
       fitQuoteToViewport();
@@ -515,7 +525,7 @@
     let transition;
 
     function applyFilter(control, animate = false) {
-      if (control.getAttribute('aria-pressed') === 'true') return;
+      if (animate && control.getAttribute('aria-pressed') === 'true') return;
       const category = control.dataset.filter;
       const showAll = category === 'all';
       transition?.progress(1);
