@@ -1006,11 +1006,12 @@ dialog > p { margin: .95rem 0 1.35rem; }
     --quote-padding: clamp(.85rem, 4vw, 1.3rem);
     --quote-viewport-height: 100dvh;
     --quote-safe-gap: max(.5rem, env(safe-area-inset-top), env(safe-area-inset-bottom));
+    --quote-available-height: calc(var(--quote-viewport-height) - 2 * var(--quote-safe-gap));
     position: fixed;
     inset: calc(var(--quote-viewport-top, 0px) + var(--quote-viewport-height) / 2) 0 auto;
     translate: 0 -50%;
     width: min(31rem, calc(100% - 1.25rem));
-    max-height: calc(var(--quote-viewport-height) - 2 * var(--quote-safe-gap));
+    max-height: var(--quote-available-height);
     margin: 0 auto;
     overflow: auto;
     scroll-padding-block: 4rem .75rem;
@@ -1030,6 +1031,44 @@ dialog > p { margin: .95rem 0 1.35rem; }
   .quote-dialog .form-actions { gap: .35rem; margin-top: .65rem; }
   .quote-dialog .form-actions .button { width: 100%; min-height: 2.75rem; }
   .quote-dialog .form-result:not(:empty) { margin-top: .5rem; padding: .45rem .65rem; font-size: .8rem; line-height: 1.35; }
+}
+
+@media (max-width: 42rem) and (orientation: portrait) {
+  .quote-dialog {
+    --quote-safe-gap: max(clamp(.5rem, calc(var(--quote-viewport-height) * .02), 1.125rem), env(safe-area-inset-top), env(safe-area-inset-bottom));
+    height: var(--quote-available-height);
+  }
+  .quote-dialog-inner { min-height: 100%; }
+  .quote-dialog-inner,
+  .quote-panel,
+  .quote-dialog form,
+  .quote-dialog .form-grid,
+  .quote-dialog .field.full {
+    display: flex;
+    flex-direction: column;
+  }
+  .quote-panel,
+  .quote-dialog form,
+  .quote-dialog .form-grid,
+  .quote-dialog .field.full { flex: 1 0 auto; }
+  .quote-dialog-heading { padding-block: clamp(.5rem, 1.5dvh, .9rem) .25rem; }
+  .quote-dialog .form-grid { gap: clamp(.5rem, 1.9dvh, 1.125rem); }
+  .quote-dialog .field :is(input, select) {
+    min-height: clamp(2.75rem, calc(var(--quote-viewport-height) * .056), 3.125rem);
+  }
+  .quote-dialog .field textarea {
+    flex: 1 0 auto;
+    height: 3rem;
+    max-height: min(20rem, 36dvh);
+  }
+}
+
+@media (max-width: 42rem) and (max-height: 38rem) and (orientation: portrait) {
+  .quote-dialog-heading { padding-block: .35rem .15rem; }
+  .quote-dialog .form-note { margin-block: 0 .45rem; }
+  .quote-dialog .form-grid { gap: .35rem; }
+  .quote-dialog .field label { margin-bottom: .2rem; }
+  .quote-dialog .form-actions { margin-top: .5rem; }
 }
 
 @media (min-width: 35rem) and (max-height: 34rem) and (pointer: coarse) {
