@@ -612,11 +612,24 @@ em { font-family: var(--serif); font-weight: 400; }
 .contact-info h2 em { white-space: nowrap; }
 .contact-info h3 { font-size: clamp(1.55rem, 2.1vw, 2.2rem); }
 .contact-info p { color: #eee3d5; font-size: .92rem; }
-.contact-details { display: flex; flex-wrap: wrap; gap: .5rem clamp(1rem, 2vw, 2rem); margin-top: 1.15rem; }
-.contact-details p { margin: 0; overflow-wrap: anywhere; }
-.contact-details span { display: block; font-size: .76rem; }
-.contact-info .contact-link { color: var(--paper); font-weight: 650; }
-.contact-info .contact-link:is(:hover, :focus-visible) { color: #ffcfb0; }
+.contact-details { display: flex; align-items: center; gap: .75rem; margin-top: 1.15rem; }
+.contact-action {
+  display: grid;
+  place-items: center;
+  width: 3rem;
+  height: 3.25rem;
+  padding: 0;
+  border: 0;
+  background: none;
+  color: var(--paper);
+  transition: color .2s;
+}
+.contact-action svg { width: 1.75rem; height: 1.75rem; transition: transform .25s var(--ease); }
+.contact-action:is(:hover, :focus-visible) { color: #ffcfb0; }
+.contact-action:focus-visible { outline-color: transparent; background: #642f2a; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  .contact-action:hover svg { transform: translateY(-3px) scale(1.08); }
+}
 .contact-location { margin-top: 1.3rem; padding-top: 1.2rem; border-top: 1px solid #f7f3ec38; }
 .contact-location h3 + p { margin-top: .35rem; }
 .contact-location p + p { margin-top: .5rem; }
