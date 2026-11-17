@@ -174,8 +174,28 @@
   const openQuote = bindDialog(quote, trigger => {
     if (trigger.dataset.project) document.querySelector('#quote-interest').value = trigger.dataset.project;
   });
+  const quoteViewport = window.visualViewport;
+  const quoteHeading = quote.querySelector('.quote-dialog-heading');
+  function fitQuoteToViewport() {
+    if (!quote.open || !quoteViewport) return;
+    quote.style.setProperty('--quote-viewport-height', `${quoteViewport.height}px`);
+    quote.style.setProperty('--quote-viewport-top', `${quoteViewport.offsetTop}px`);
+
+    const field = document.activeElement;
+    if (!field?.matches('#quote-form :is(input, select, textarea)') || quote.scrollHeight <= quote.clientHeight) return;
+    const bounds = field.getBoundingClientRect();
+    const top = quoteHeading.getBoundingClientRect().bottom + 8;
+    const bottom = quote.getBoundingClientRect().bottom - 8;
+    if (bounds.bottom > bottom) quote.scrollTop += bounds.bottom - bottom;
+    else if (bounds.top < top) quote.scrollTop += bounds.top - top;
+  }
+  quoteViewport?.addEventListener('resize', fitQuoteToViewport);
+  quoteViewport?.addEventListener('scroll', fitQuoteToViewport);
   document.querySelectorAll('[data-open-quote]').forEach(button => {
-    button.addEventListener('click', () => openQuote(button));
+    button.addEventListener('click', () => {
+      openQuote(button);
+      fitQuoteToViewport();
+    });
   });
 
   function setupForm(form) {
